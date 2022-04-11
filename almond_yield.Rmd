@@ -1,0 +1,76 @@
+---
+title: "alomnd_yield"
+author: "Jake Eisaguirre"
+date: "4/11/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
+library(lubridate)
+library(janitor)
+```
+
+```{r}
+
+clim_data <- read_table(here("clim.txt")) %>% 
+  clean_names() %>% 
+  select(-d)
+
+```
+
+```{r}
+
+temp_feb <- clim_clean %>% 
+  group_by(month, year) %>% 
+  summarize(mean_tmin_c = mean(tmin_c)) %>% 
+  filter(month == 2)
+  
+precip_jan <- clim_clean %>% 
+  group_by(month, year) %>% 
+  summarize(mean_precip = sum(precip)) %>% 
+  filter(month == 1) 
+
+temp_precip <- left_join(precip_jan, temp_feb, by = c("year"))
+
+```
+
+```{r}
+# need feb and jan data
+almond_yield <- function(temp, precip,
+                         temp_min_coeff_1 = -0.015, 
+                         temp_min_coeff_2 = -0.0046, 
+                         percip_coeff_1 = -0.07, 
+                         percip_coeff_2 = 0.0043, 
+                         intercept = 0.28){
+  
+  # calculating almond yield
+  yield = (temp_min_coeff_1 * temp) + (temp_min_coeff_2 * temp^2) +
+    (percip_coeff_1 * precip) + (percip_coeff_2 * precip^2) + intercept
+  
+  # results
+  return(yield)
+  
+}
+```
+
+```{r}
+
+
+
+yield_2000 <- almond_yield(temp = temp_feb$mean_tmin_c[[12]], 
+                           precip = precip_jan$mean_precip[[12]])
+
+yield_2001 <- almond_yield(temp = temp_feb$mean_tmin_c[[13]], 
+                           precip = precip_jan$mean_precip[[13]])
+
+yield_2002 <- almond_yield(temp = temp_feb$mean_tmin_c[[14]], 
+                           precip = precip_jan$mean_precip[[14]])
+
+
+```
+
+
+# 

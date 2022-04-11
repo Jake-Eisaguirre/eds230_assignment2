@@ -11,3 +11,4 @@ almond_yield <- function(temp, precip,
   return(harvest)
   
 }
+
